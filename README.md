@@ -1,6 +1,7 @@
 # SynthesizerV scripts
 
 Synthesizer V のスクリプト置き場です。`scripts/` 以下に収録された Lua スクリプトを、Synthesizer V のスクリプト機能から実行してお使いください。
+※ 動作確認環境はSynthesizer V Studio 2 Pro (2.1.2)になります。他の環境での動作は保証していません。
 
 ## 収録スクリプト
 - [`scripts/auto-tuned.lua`](scripts/auto-tuned.lua)
