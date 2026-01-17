@@ -12,7 +12,7 @@ function getClientInfo()
         name = SV:T("ケロケロボイス（PitchControlCurve）"),
         category = "Pitch",
         author = "Kagakuri",
-        versionNumber = 7,
+        versionNumber = 8,
         minEditorVersion = 130816 -- v2.1.0 以上
     }
 end
@@ -32,13 +32,30 @@ function main()
         local note = selectedNotes[i]
         local onset = note:getOnset()
         local duration = note:getDuration()
+        local endPos = note:getEnd()
         local group = note:getParent()
+        local basePitch = note:getPitch()
 
-        -- 1. ノートの基本音高（MIDI番号）を取得
+        -- 1. 既存のピッチ偏差 (Automation) の削除
+        local pitchDelta = group:getParameter("pitchDelta")
+        pitchDelta:remove(onset, endPos)
+
+        -- 2. 既存の PitchControl オブジェクトの削除
+        local numControls = group:getNumPitchControls()
+        for j = numControls, 1, -1 do
+            local control = group:getPitchControl(j)
+            local ctrlPos = control:getPosition()
+
+            if ctrlPos >= onset and ctrlPos < endPos then
+                group:removePitchControl(j)
+            end
+        end
+
+        -- 3. ノートの基本音高（MIDI番号）を取得
         -- Synthesizer V では MIDI 番号 1 = 1半音(semitone)
         local basePitch = note:getPitch()
 
-        -- 2. ノート属性のリセット
+        -- 4. ノート属性のリセット
         note:setAttributes({
             dF0Vbr = 0,
             dF0Left = 0,
@@ -48,7 +65,7 @@ function main()
             dF0VbrMod = 0
         })
 
-        -- 3. PitchControlCurve の作成
+        -- 5. PitchControlCurve の作成
         local curve = SV:create("PitchControlCurve")
 
         -- 開始位置をノートのオンセットに設定
@@ -63,7 +80,7 @@ function main()
             {duration, 0}
         })
 
-        -- 4. ノートグループにピッチ制御を追加
+        -- 6. ノートグループにピッチ制御を追加
         group:addPitchControl(curve)
     end
 
